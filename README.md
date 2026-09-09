@@ -10,13 +10,54 @@ Berkeley Network is a secure, mobile-friendly relationship tracker for Berkeley 
 
 ## Grading evidence
 
-Add the final screenshots after deploying to Vercel:
+The product walkthrough below covers the complete intended workflow. Production screenshots can be added to this section as additional visual evidence.
 
 - [ ] Sign up, sign in, and sign out
 - [ ] Create, refresh, edit, and delete a contact
 - [ ] Invalid input rejected with a clear message
 - [ ] Two-account privacy verification
 - [x] Automated validation and RLS migration tests
+
+## Product walkthrough
+
+1. Open the live application and create an account with an email address and a password of at least six characters.
+2. Confirm the email if Supabase email confirmation is enabled, then sign in.
+3. Add a contact with a name and optional company, role, meeting location, priority, and notes.
+4. Refresh the page to confirm the contact persists in Supabase.
+5. Search, filter by priority, and sort the private contact list.
+6. Edit the contact, save the changes, and then delete it using the confirmation dialog.
+7. Sign out and confirm the private tracker is replaced by the authentication screen.
+
+## Requirements coverage
+
+### Functional requirements
+
+| Requirement | Implementation |
+| --- | --- |
+| Sign up, sign in, and sign out | Supabase email/password authentication with persistent browser sessions |
+| Add complete contact details | Name, company, role, meeting location, notes, and priority form fields |
+| Restrict priority values | Zod and PostgreSQL both allow only `high`, `medium`, or `low` |
+| View and sort contacts | Searchable list with newest, name, and priority sorting |
+| Edit and delete contacts | Authenticated PATCH and DELETE Node.js API routes |
+| Persist through refresh | Contacts are stored in Supabase Postgres and loaded after authentication |
+| Reject invalid input clearly | Blank names and invalid priorities return specific validation messages |
+| Understandable UI states | Dedicated loading, empty, success, validation, and server-error states |
+| Web and mobile friendly | Responsive layout adapts from a single-column phone view to a desktop workspace |
+
+### Security requirements and provider mapping
+
+The course assignment specifies **Next.js + Supabase + Vercel**. Some later checklist wording refers to Neon's `text user_id`, `auth.user_id()`, and Data API. This implementation uses the direct Supabase equivalents: Supabase Auth user IDs are UUIDs, so `user_id` is `uuid not null default auth.uid()` and references `auth.users(id)`. Using `text` would discard the native type and weaken the foreign-key design.
+
+| Requirement | Implementation or evidence status |
+| --- | --- |
+| Non-null authenticated owner | `user_id uuid not null default auth.uid()` with an `auth.users` foreign key |
+| Row Level Security | RLS is enabled and forced on `public.contacts` |
+| Separate CRUD policies | Dedicated SELECT, INSERT, UPDATE, and DELETE policies target `authenticated` users |
+| Owner-only rows | Every policy compares `auth.uid()` with `user_id` |
+| Prevent ownership transfer | UPDATE has both `using` and `with check` ownership expressions |
+| Two-account production proof | Implementation is ready; final production evidence is still pending |
+| Public browser configuration | Only the Supabase project URL and publishable key are exposed; anonymous table access is revoked |
+| Secrets remain server-only | No service-role key, database connection string, or cookie secret is used or committed; local environment files are ignored |
 
 ## Features
 
@@ -29,22 +70,24 @@ Add the final screenshots after deploying to Vercel:
 
 ## Technology stack
 
-- **React 19:** interactive frontend
-- **Next.js 16 and Node.js:** authenticated backend API routes
-- **Supabase Auth:** identity and session tokens
-- **Supabase Postgres:** durable contact storage
-- **PostgreSQL RLS:** database-enforced ownership
-- **Zod and Vitest:** shared validation and automated tests
-- **Tailwind CSS and shadcn/ui:** responsive design system
-- **Vercel:** production hosting
+| Technology | Role and reason for choosing it |
+| --- | --- |
+| React 19 | Builds a responsive, stateful contact-management interface from reusable components. |
+| Next.js 16 and Node.js | Keep the React frontend and authenticated backend API in one deployable project. |
+| Supabase Auth | Provides email/password identity, secure sessions, and signed access tokens. |
+| Supabase Postgres | Provides durable relational storage and integrates directly with Supabase Auth. |
+| PostgreSQL RLS | Enforces contact ownership in the database even if an API request is malformed. |
+| Zod and Vitest | Share input validation rules and provide fast automated regression tests. |
+| Tailwind CSS and shadcn/ui | Provide accessible UI primitives and a responsive design system. |
+| Vercel | Provides managed Next.js builds, Node.js functions, HTTPS, and production hosting. |
 
 ## Architecture
 
 ~~~text
-React frontend
-  -> Supabase Auth session
-  -> bearer access token
-Next.js Node.js backend
+Browser
+  -> React frontend hosted by Vercel
+  -> Supabase Auth session and bearer access token
+Vercel Node.js backend
   -> verifies the token
   -> validates data with Zod
   -> queries with the user's token
@@ -64,12 +107,18 @@ The frontend never receives a database password or service-role key. The public 
 
 ## Local setup
 
-1. Clone this repository and enter its directory.
+1. Clone this repository and enter its directory:
+
+~~~bash
+git clone https://github.com/jennawang1121/berkeley-network.git
+cd berkeley-network
+~~~
+
 2. Install Node.js 22 or newer.
-3. Run **npm install**.
+3. Install dependencies with **npm install**.
 4. Create or open a Supabase project.
 5. Run **supabase/migrations/001_contacts.sql** in the Supabase SQL Editor.
-6. Copy **.env.example** to **.env.local**.
+6. Run **cp .env.example .env.local**.
 7. Add the project URL and public anon key.
 8. Run **npm run dev** and open **http://localhost:3000**.
 
@@ -126,6 +175,13 @@ Anonymous access is revoked. The Node backend forwards each user's token, so it 
 
 Run **npm test**. The suite verifies valid data, blank-name rejection, invalid-priority rejection, RLS activation, four separate CRUD policies, and UPDATE ownership protection.
 
+Latest local result:
+
+~~~text
+Test Files  2 passed (2)
+Tests       9 passed (9)
+~~~
+
 Also run:
 
 ~~~bash
@@ -140,7 +196,7 @@ The production Supabase migration was applied successfully. A direct request usi
 ## Deployment
 
 1. Push this project to a public GitHub repository.
-2. Import the repository into Vercel.
+2. Import the repository into Vercel or run **vercel deploy --prod** from the project directory.
 3. Add both Supabase environment variables to Development, Preview, and Production.
 4. Deploy.
 5. Add the Vercel production URL to Supabase Auth's Site URL and Redirect URLs.
