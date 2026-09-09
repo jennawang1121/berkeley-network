@@ -76,9 +76,9 @@ After User B's direct update and delete attempts both returned `404`, User A sig
 | Understandable UI states | Dedicated loading, empty, success, validation, and server-error states |
 | Web and mobile friendly | Responsive layout adapts from a single-column phone view to a desktop workspace |
 
-### Security requirements and provider mapping
+### Security requirements
 
-The course assignment specifies **Next.js + Supabase + Vercel**. Some later checklist wording refers to Neon's `text user_id`, `auth.user_id()`, and Data API. This implementation uses the direct Supabase equivalents: Supabase Auth user IDs are UUIDs, so `user_id` is `uuid not null default auth.uid()` and references `auth.users(id)`. Using `text` would discard the native type and weaken the foreign-key design.
+This project uses **Next.js + Supabase + Vercel** throughout. Supabase Auth user IDs are UUIDs, so `user_id` is `uuid not null default auth.uid()` and references `auth.users(id)`. This keeps the ownership column aligned with Supabase's native identity type and enforces referential integrity.
 
 | Requirement | Implementation or evidence status |
 | --- | --- |
@@ -89,7 +89,7 @@ The course assignment specifies **Next.js + Supabase + Vercel**. Some later chec
 | Prevent ownership transfer | UPDATE has both `using` and `with check` ownership expressions |
 | Two-account production proof | Verified in production: User B could not list, update, or delete User A's contact |
 | Public browser configuration | Only the Supabase project URL and publishable key are exposed; anonymous table access is revoked |
-| Secrets remain server-only | No service-role key, database connection string, or cookie secret is used or committed; local environment files are ignored |
+| Secrets remain server-only | No service-role key or database connection string is used or committed; local environment files are ignored |
 
 ## Features
 
