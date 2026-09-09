@@ -6,6 +6,8 @@ Berkeley Network is a secure, mobile-friendly relationship tracker for Berkeley 
 
 **Vercel URL:** https://berkeley-network-one.vercel.app
 
+**Public repository:** https://github.com/jennawang1121/berkeley-network
+
 ## Grading evidence
 
 Add the final screenshots after deploying to Vercel:
@@ -155,7 +157,7 @@ The production Supabase migration was applied successfully. A direct request usi
 - [x] Automated tests
 - [x] Secret-bearing environment files ignored
 - [x] Supabase migration applied to production
-- [ ] Public GitHub repository created
+- [x] Public GitHub repository created
 - [x] Vercel production deployment completed
 - [ ] Production two-account evidence added
 
