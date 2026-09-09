@@ -133,7 +133,7 @@ export default function Home() {
           <label className="block text-sm font-semibold">Email<Input className="mt-2 h-11" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" /></label>
           <label className="block text-sm font-semibold">Password<Input className="mt-2 h-11" type="password" minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete={authMode === 'signin' ? 'current-password' : 'new-password'} /></label>
           {message && <p role="alert" className={`rounded-xl px-3 py-2.5 text-sm ${message.kind === 'error' ? 'bg-red-50 text-red-800' : 'bg-emerald-50 text-emerald-800'}`}>{message.text}</p>}
-          <Button className="h-11 w-full" disabled={saving}>{saving ? 'Please wait…' : authMode === 'signin' ? 'Sign in' : 'Create account'}</Button>
+          <Button type="submit" className="h-11 w-full" disabled={saving}>{saving ? 'Please wait…' : authMode === 'signin' ? 'Sign in' : 'Create account'}</Button>
         </form>
         <button className="mt-5 w-full text-sm font-semibold text-primary hover:underline" onClick={() => { setAuthMode(authMode === 'signin' ? 'signup' : 'signin'); setMessage(null); }}>{authMode === 'signin' ? 'New here? Create an account' : 'Already have an account? Sign in'}</button>
       </section>
@@ -153,7 +153,7 @@ export default function Home() {
             <label className="block text-sm font-semibold">Priority<select className="mt-1.5 h-10 w-full rounded-md border bg-background px-3 text-sm" value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></label>
             <label className="block text-sm font-semibold">Notes<Textarea className="mt-1.5 min-h-24" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="What should you remember?" /></label>
           </div>
-          <div className="mt-5 flex gap-2"><Button className="flex-1" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Add contact'}</Button>{editingId && <Button type="button" variant="outline" onClick={() => { setEditingId(null); setForm(blank); }}>Cancel</Button>}</div>
+          <div className="mt-5 flex gap-2"><Button type="submit" className="flex-1" disabled={saving}>{saving ? 'Saving…' : editingId ? 'Save changes' : 'Add contact'}</Button>{editingId && <Button type="button" variant="outline" onClick={() => { setEditingId(null); setForm(blank); }}>Cancel</Button>}</div>
         </form>
         <section>
           <div className="mb-5"><p className="text-xs font-bold uppercase tracking-[0.16em] text-primary">Your people</p><h2 className="mt-1 text-3xl font-bold tracking-tight">Stay thoughtfully connected.</h2><p className="mt-2 text-sm text-muted-foreground">Only you can view and manage these contacts.</p></div>
