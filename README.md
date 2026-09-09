@@ -10,18 +10,50 @@ Berkeley Network is a secure, mobile-friendly relationship tracker for Berkeley 
 
 ## Grading evidence
 
-The product walkthrough below covers the complete intended workflow. Production screenshots can be added to this section as additional visual evidence.
+The product walkthrough below was executed against the live Vercel deployment on September 9, 2026.
 
-- [ ] Sign up, sign in, and sign out
-- [ ] Create, refresh, edit, and delete a contact
-- [ ] Invalid input rejected with a clear message
-- [ ] Two-account privacy verification
+- [x] Sign up, sign in, and sign out
+- [x] Create, refresh, edit, and delete a contact
+- [x] Invalid input rejected with a clear message
+- [x] Two-account privacy verification
 - [x] Automated validation and RLS migration tests
+
+### Authentication and responsive layout
+
+![Production sign-in screen](evidence/01-sign-in.png)
+
+![Mobile sign-in screen](evidence/10-mobile-sign-in.png)
+
+### Create, refresh, edit, validate, and delete
+
+![Contact created successfully](evidence/02-contact-created.png)
+
+![Contact persisted after a browser refresh](evidence/03-contact-refreshed.png)
+
+![Contact edited successfully](evidence/04-contact-edited.png)
+
+![Blank name rejected with a clear error](evidence/05-invalid-input.png)
+
+![Contact deleted successfully](evidence/08-contact-deleted.png)
+
+### Two-account privacy evidence
+
+User B's authenticated account contains zero contacts while User A's evidence contact exists:
+
+![User B cannot see User A's contact](evidence/06-user-b-private-view.png)
+
+After User B's direct update and delete attempts both returned `404`, User A signed back in and the original contact was still present:
+
+![User A's contact remains intact](evidence/07-user-a-contact-intact.png)
+
+### Sign-out evidence
+
+![Successful sign-out returns to authentication](evidence/09-signed-out.png)
 
 ## Product walkthrough
 
 1. Open the live application and create an account with an email address and a password of at least six characters.
-2. Confirm the email if Supabase email confirmation is enabled, then sign in.
+2. Confirm the email if Supabase email confirmation is enabled, return to the live URL, and sign in.
 3. Add a contact with a name and optional company, role, meeting location, priority, and notes.
 4. Refresh the page to confirm the contact persists in Supabase.
 5. Search, filter by priority, and sort the private contact list.
@@ -55,7 +87,7 @@ The course assignment specifies **Next.js + Supabase + Vercel**. Some later chec
 | Separate CRUD policies | Dedicated SELECT, INSERT, UPDATE, and DELETE policies target `authenticated` users |
 | Owner-only rows | Every policy compares `auth.uid()` with `user_id` |
 | Prevent ownership transfer | UPDATE has both `using` and `with check` ownership expressions |
-| Two-account production proof | Implementation is ready; final production evidence is still pending |
+| Two-account production proof | Verified in production: User B could not list, update, or delete User A's contact |
 | Public browser configuration | Only the Supabase project URL and publishable key are exposed; anonymous table access is revoked |
 | Secrets remain server-only | No service-role key, database connection string, or cookie secret is used or committed; local environment files are ignored |
 
@@ -171,6 +203,23 @@ Anonymous access is revoked. The Node backend forwards each user's token, so it 
 6. Confirm both fail and the record remains unchanged.
 7. Sign back in as User A and capture the unchanged record.
 
+Production result:
+
+~~~text
+User A sign-in                                      PASS
+User B sign-in                                      PASS
+User A create                                       PASS (201)
+User A read own contact                             PASS
+User B cannot read User A contact                   PASS
+User B cannot update User A contact                 PASS (404)
+User B cannot delete User A contact                 PASS (404)
+User A contact unchanged after User B attempts      PASS
+Invalid input rejected                              PASS (422: Name is required.)
+User A update                                       PASS (200)
+User A delete                                       PASS (200)
+Deleted contact stays deleted                       PASS
+~~~
+
 ## Automated tests
 
 Run **npm test**. The suite verifies valid data, blank-name rejection, invalid-priority rejection, RLS activation, four separate CRUD policies, and UPDATE ownership protection.
@@ -215,11 +264,11 @@ The production Supabase migration was applied successfully. A direct request usi
 - [x] Supabase migration applied to production
 - [x] Public GitHub repository created
 - [x] Vercel production deployment completed
-- [ ] Production two-account evidence added
+- [x] Production two-account evidence added
 
 ## Known limitations and next steps
 
 - Email/password is the only sign-in method; Berkeley SSO could be added later.
 - Browser filtering is appropriate for a small personal list; server pagination would help at scale.
-- A connected Supabase test project would enable automated integration tests in CI.
-- Evidence screenshots require a configured production project and two test accounts.
+- The live integration test is currently manual; a dedicated Supabase test project would allow it to run automatically in CI.
+- Test accounts and evidence data should be cleaned up periodically after grading.
